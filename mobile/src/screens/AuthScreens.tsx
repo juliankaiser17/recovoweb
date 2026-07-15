@@ -7,12 +7,12 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
-import { loginWithEmail, registerWithEmail, createUserProfile, signInWithGoogle, signInWithGoogleWeb, updateUserProfile, savePainMarker } from '@/services/firebase';
+import { loginWithEmail, registerWithEmail, createUserProfile, signInWithGoogle, signInWithGoogleWeb, updateUserProfile, savePainMarker, auth } from '@/services/firebase';
 import { useAppStore } from '@/store/useAppStore';
 import { COLORS, FONTS, SPACING, RADIUS } from '@/utils/theme';
 import { getUserProfile } from '@/services/firebase';
 
-import Reanimated, { useAnimatedStyle, withSpring, withTiming, useSharedValue, FadeIn, FadeOut, SlideInRight, SlideOutLeft, SlideInDown } from 'react-native-reanimated';
+import Reanimated, { useAnimatedStyle, withSpring, withTiming, useSharedValue, FadeIn, FadeOut, SlideInRight, SlideOutLeft, SlideInDown, withRepeat, Easing } from 'react-native-reanimated';
 
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import HumanBodySvg, { BodyRegion } from '@/components/HumanBodySvg';
@@ -459,6 +459,20 @@ function RowData({ theme, label, value, valueColor }: any) {
 // ─── Onboarding Screen ────────────────────────────────────────────────────────
 
 export function OnboardingScreen() {
+  const rotation = useSharedValue(0);
+  
+  React.useEffect(() => {
+    rotation.value = withRepeat(
+      withTiming(360, { duration: 2000, easing: Easing.linear }),
+      -1,
+      false
+    );
+  }, []);
+  
+  const animatedIconStyle = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${rotation.value}deg` }]
+  }));
+
   const { user, profile, setProfile } = useAppStore();
   const [isDark, setIsDark] = useState(true);
   const theme = isDark ? THEMES.dark : THEMES.light;
@@ -547,7 +561,7 @@ export function OnboardingScreen() {
       const isCoach = answers.role === 'coach';
       await updateUserProfile(user.uid, {
         uid: user.uid,
-        email: user.email || profile?.email || 'test@example.com',
+        email: user.email || auth.currentUser?.email || profile?.email || '',
         name: user.displayName || profile?.name || 'Athlete',
         role: answers.role || profile?.role || 'athlete',
         sport: isCoach ? (answers.coachSport || 'Other') : (answers.sport || 'Other'),
@@ -1045,7 +1059,7 @@ export function OnboardingScreen() {
         {calibrating && (
           <View style={[StyleSheet.absoluteFill, { backgroundColor: theme.bg, zIndex: 999, justifyContent: 'center', alignItems: 'center' }]}>
             <View style={{ width: 80, height: 80, borderRadius: 40, backgroundColor: theme.orange + '20', alignItems: 'center', justifyContent: 'center', marginBottom: 32 }}>
-              <Reanimated.View style={{ transform: [{ rotate: '180deg' }] }}>
+              <Reanimated.View style={animatedIconStyle}>
                 <Ionicons name="sync" size={40} color={theme.orange} />
               </Reanimated.View>
             </View>
