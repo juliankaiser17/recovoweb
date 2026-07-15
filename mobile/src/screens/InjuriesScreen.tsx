@@ -582,6 +582,27 @@ function AthleteInjuriesView() {
                 ))}
               </View>
 
+              
+              <Text style={[styles.inputLabel, { color: COLORS.accent, marginTop: SPACING.md }]}>AI RECOVERY INSIGHTS</Text>
+              <View style={{ backgroundColor: COLORS.accent + '15', padding: SPACING.md, borderRadius: RADIUS.md, borderWidth: 1, borderColor: COLORS.accent + '40', marginBottom: SPACING.lg }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: SPACING.sm }}>
+                  <Ionicons name="hardware-chip" size={18} color={COLORS.accent} />
+                  <Text style={{ fontFamily: FONTS.mono, fontSize: 12, color: COLORS.accent, marginLeft: 6, fontWeight: 'bold' }}>BASED ON TAP LOCATION</Text>
+                </View>
+                {INJURY_DATABASE.filter(i => i.part === selectedRegion?.key).length > 0 ? (
+                  INJURY_DATABASE.filter(i => i.part === selectedRegion?.key).slice(0, 2).map((injury, idx) => (
+                    <View key={injury.id} style={{ marginBottom: idx === 0 ? SPACING.sm : 0 }}>
+                      <Text style={{ fontFamily: FONTS.h3, fontSize: 14, color: colors.textPrimary, marginBottom: 2 }}>{injury.name}</Text>
+                      <Text style={{ fontFamily: FONTS.body, fontSize: 13, color: colors.textSecondary }}>{injury.treatment}</Text>
+                    </View>
+                  ))
+                ) : (
+                  <Text style={{ fontFamily: FONTS.body, fontSize: 13, color: colors.textSecondary }}>
+                    Rest the affected area and apply ice if swollen. Avoid heavy loading until pain subsides. If pain is sharp, consult a professional.
+                  </Text>
+                )}
+              </View>
+
               <Text style={[styles.inputLabel, { color: colors.textMuted }]}>NOTES (OPTIONAL)</Text>
               <TextInput
                 style={[styles.notesInput, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.textPrimary }]}
