@@ -458,6 +458,19 @@ function RowData({ theme, label, value, valueColor }: any) {
 
 // ─── Onboarding Screen ────────────────────────────────────────────────────────
 
+
+const getAIProtocol = (id: string) => {
+  if (id.includes('knee')) return { do: 'Low-impact cycling, swimming', dont: 'Heavy squats, jumping', warning: 'Sharp pain under kneecap' };
+  if (id.includes('shoulder')) return { do: 'Banded internal/external rotation', dont: 'Heavy overhead pressing', warning: 'Clicking accompanied by sharp pain' };
+  if (id.includes('back') || id === 'core') return { do: 'Bird-dogs, dead bugs, core bracing', dont: 'Heavy deadlifts, spinal twisting', warning: 'Tingling or numbness shooting down leg' };
+  if (id.includes('foot') || id.includes('ankle')) return { do: 'Plantar fascia stretching, calf raises', dont: 'Barefoot running, plyometrics', warning: 'Pain worsens when standing first thing in morning' };
+  if (id.includes('hip')) return { do: 'Glute bridges, hip flexor stretches', dont: 'Deep squats, explosive sprinting', warning: 'Catching sensation in the joint' };
+  if (id.includes('chest')) return { do: 'Light pec stretching, back rows', dont: 'Heavy bench press, chest flyes', warning: 'Pain worsens with deep breathing' };
+  if (id.includes('quad')) return { do: 'Light cycling, foam rolling', dont: 'Heavy leg press, sprinting', warning: 'Sharp tearing sensation' };
+  if (id.includes('shin')) return { do: 'Calf stretching, toe raises', dont: 'High-impact running on hard surfaces', warning: 'Pinpoint bone tenderness' };
+  return { do: 'Light mobility work, foam rolling', dont: 'Heavy loading on the joint', warning: 'Sharp, sudden, or shooting pain' };
+};
+
 export function OnboardingScreen() {
   const rotation = useSharedValue(0);
   
@@ -1093,6 +1106,36 @@ export function OnboardingScreen() {
               />
               <RowData theme={theme} label="Core Focus" value={answers.goal?.includes("injury") && !answers.goal?.includes("Prevent") ? "REHABILITATION" : "OPTIMIZATION"} />
             </View>
+
+            {answers.bodyParts && answers.bodyParts.length > 0 && answers.injuryStatus && !answers.injuryStatus.startsWith("No") && (
+              <View style={{ marginTop: 24, backgroundColor: theme.orange + '15', borderWidth: 1, borderColor: theme.orange + '40', borderRadius: 16, padding: 16 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16 }}>
+                  <Ionicons name="hardware-chip" size={16} color={theme.orange} />
+                  <Text style={{ fontSize: 12, fontWeight: '800', color: theme.orange, marginLeft: 6, letterSpacing: 1 }}>AI PROTOCOL GENERATED</Text>
+                </View>
+                {answers.bodyParts.map((bp: string, idx: number) => {
+                   const label = BODY_PARTS.find(p => p.id === bp)?.label || bp;
+                   const protocol = getAIProtocol(bp);
+                   return (
+                     <View key={bp} style={{ marginBottom: idx === answers.bodyParts.length - 1 ? 0 : 16 }}>
+                       <Text style={{ fontSize: 16, fontWeight: '700', color: theme.text, marginBottom: 8 }}>{label}</Text>
+                       <View style={{ flexDirection: 'row', alignItems: 'flex-start', marginBottom: 4 }}>
+                         <Ionicons name="checkmark-circle" size={16} color="#10B981" style={{ marginRight: 6, marginTop: 2 }} />
+                         <Text style={{ fontSize: 14, color: theme.textDim, flex: 1, lineHeight: 20 }}><Text style={{ fontWeight: 'bold' }}>DO:</Text> {protocol.do}</Text>
+                       </View>
+                       <View style={{ flexDirection: 'row', alignItems: 'flex-start', marginBottom: 4 }}>
+                         <Ionicons name="close-circle" size={16} color="#EF4444" style={{ marginRight: 6, marginTop: 2 }} />
+                         <Text style={{ fontSize: 14, color: theme.textDim, flex: 1, lineHeight: 20 }}><Text style={{ fontWeight: 'bold' }}>AVOID:</Text> {protocol.dont}</Text>
+                       </View>
+                       <View style={{ flexDirection: 'row', alignItems: 'flex-start' }}>
+                         <Ionicons name="warning" size={16} color="#F59E0B" style={{ marginRight: 6, marginTop: 2 }} />
+                         <Text style={{ fontSize: 14, color: theme.textDim, flex: 1, lineHeight: 20 }}><Text style={{ fontWeight: 'bold' }}>WARNING:</Text> {protocol.warning}</Text>
+                       </View>
+                     </View>
+                   );
+                })}
+              </View>
+            )}
             <View style={{ flex: 1, minHeight: 40 }} />
             <ContinueBtn theme={theme} onClick={handleFinish} disabled={loading} label={loading ? "PREPARING DASHBOARD..." : "Enter Recovo Workspace"} />
           </View>
