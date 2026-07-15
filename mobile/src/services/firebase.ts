@@ -7,6 +7,7 @@ import {
   signOut,
   GoogleAuthProvider,
   signInWithCredential,
+  signInWithPopup,
   onAuthStateChanged,
   User,
   sendPasswordResetEmail,
@@ -67,6 +68,11 @@ export const deleteCurrentUser = (user: User) => deleteUser(user);
 export const signInWithGoogle = async (idToken: string) => {
   const credential = GoogleAuthProvider.credential(idToken);
   return signInWithCredential(auth, credential);
+};
+
+export const signInWithGoogleWeb = async () => {
+  const provider = new GoogleAuthProvider();
+  return signInWithPopup(auth, provider);
 };
 
 export { auth, db };

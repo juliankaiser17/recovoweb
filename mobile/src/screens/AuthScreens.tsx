@@ -7,7 +7,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
-import { loginWithEmail, registerWithEmail, createUserProfile, signInWithGoogle, updateUserProfile, savePainMarker } from '@/services/firebase';
+import { loginWithEmail, registerWithEmail, createUserProfile, signInWithGoogle, signInWithGoogleWeb, updateUserProfile, savePainMarker } from '@/services/firebase';
 import { useAppStore } from '@/store/useAppStore';
 import { COLORS, FONTS, SPACING, RADIUS } from '@/utils/theme';
 import { getUserProfile } from '@/services/firebase';
@@ -82,11 +82,13 @@ export function LoginScreen() {
   };
 
   const handleGoogleSignIn = async () => {
-    if (Platform.OS === 'web') {
-      setErrorMsg('Google Sign-In is not supported on the web version.');
-      return;
-    }
     try {
+      if (Platform.OS === 'web') {
+        await signInWithGoogleWeb();
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        return;
+      }
+      
       await GoogleSignin.hasPlayServices();
       const userInfo = await GoogleSignin.signIn();
       if (userInfo.data && userInfo.data.idToken) {
