@@ -250,6 +250,8 @@ export function LoginScreen() {
 
 const SPRING_CONFIG = { damping: 14, stiffness: 150 };
 
+const AnimatedPressableComponent = Reanimated.createAnimatedComponent(Pressable);
+
 function AnimatedPressable({ onPress, disabled, style, children, activeScale = 0.96 }: any) {
   const scale = useSharedValue(1);
 
@@ -258,7 +260,7 @@ function AnimatedPressable({ onPress, disabled, style, children, activeScale = 0
   }));
 
   return (
-    <Pressable
+    <AnimatedPressableComponent
       onPress={onPress}
       disabled={disabled}
       onPressIn={() => {
@@ -267,11 +269,10 @@ function AnimatedPressable({ onPress, disabled, style, children, activeScale = 0
       onPressOut={() => {
         if (!disabled) scale.value = withSpring(1, SPRING_CONFIG);
       }}
+      style={[style, animatedStyle]}
     >
-      <View style={[style, animatedStyle]}>
-        {children}
-      </View>
-    </Pressable>
+      {children}
+    </AnimatedPressableComponent>
   );
 }
 
