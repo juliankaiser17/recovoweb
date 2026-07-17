@@ -214,8 +214,15 @@ export function AnatomicalModel3D({
 
     const pageX = e.nativeEvent.pageX;
     const pageY = e.nativeEvent.pageY;
+    
+    // Explicitly compute local coordinates for Android to prevent SVG locationX bugs
     let locationX = e.nativeEvent.locationX;
     let locationY = e.nativeEvent.locationY;
+    
+    if (Platform.OS !== 'web' && containerPageX.current !== 0) {
+      locationX = pageX - containerPageX.current;
+      locationY = pageY - containerPageY.current;
+    }
 
     if (Platform.OS === 'web') {
       const rect = e.currentTarget?.getBoundingClientRect?.() || e.target?.getBoundingClientRect?.();
@@ -295,8 +302,8 @@ export function AnatomicalModel3D({
         }
       });
 
-      // Accessible 34px threshold for comfortable hit detection
-      if (closestRegion && minDistance < 34) {
+      // Highly accessible 55px threshold for comfortable mobile hit detection
+      if (closestRegion && minDistance < 55) {
         handleRegionTap(closestRegion);
       }
     }
