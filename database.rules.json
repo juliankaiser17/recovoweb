@@ -4,35 +4,50 @@
       "$uid": {
         ".read": "$uid === auth.uid || root.child('users').child(auth.uid).child('role').val() === 'coach' && root.child('legions').child(root.child('users').child(auth.uid).child('legionId').val()).child('athleteUids').child($uid).exists()",
         ".write": "$uid === auth.uid",
-        ".validate": "newData.hasChildren(['uid', 'email', 'name', 'role'])",
+        ".validate": "newData.hasChildren(['uid', 'email', 'name', 'role']) && newData.child('uid').val() === $uid && newData.child('email').isString() && newData.child('email').val().length <= 254 && newData.child('name').isString() && newData.child('name').val().length <= 100 && (newData.child('role').val() === 'athlete' || newData.child('role').val() === 'coach')",
         "inbox": {
           ".read": "$uid === auth.uid",
-          ".write": "$uid === auth.uid || root.child('users').child(auth.uid).child('role').val() === 'coach' && root.child('legions').child(root.child('users').child(auth.uid).child('legionId').val()).child('athleteUids').child($uid).exists()"
+          ".write": "$uid === auth.uid || root.child('users').child(auth.uid).child('role').val() === 'coach' && root.child('legions').child(root.child('users').child(auth.uid).child('legionId').val()).child('athleteUids').child($uid).exists()",
+          "$messageId": {
+            ".validate": "newData.hasChildren(['athleteUid', 'coachUid', 'title', 'message', 'type', 'timestamp', 'read']) && newData.child('title').isString() && newData.child('title').val().length <= 200 && newData.child('message').isString() && newData.child('message').val().length <= 2000 && (newData.child('type').val() === 'workout_assignment' || newData.child('type').val() === 'coach_note' || newData.child('type').val() === 'alert') && newData.child('timestamp').isNumber() && newData.child('read').isBoolean()"
+          }
         }
       }
     },
     "workouts": {
       "$uid": {
         ".read": "$uid === auth.uid",
-        ".write": "$uid === auth.uid"
+        ".write": "$uid === auth.uid",
+        "$workoutId": {
+          ".validate": "newData.hasChildren(['uid', 'date', 'duration', 'caloriesBurned', 'sets']) && newData.child('uid').val() === $uid && newData.child('date').isNumber() && newData.child('duration').isNumber() && newData.child('duration').val() >= 0 && newData.child('duration').val() <= 1440 && newData.child('caloriesBurned').isNumber() && newData.child('caloriesBurned').val() >= 0 && newData.child('caloriesBurned').val() <= 50000"
+        }
       }
     },
     "recovery": {
       "$uid": {
         ".read": "$uid === auth.uid || root.child('users').child(auth.uid).child('role').val() === 'coach' && root.child('legions').child(root.child('users').child(auth.uid).child('legionId').val()).child('athleteUids').child($uid).exists()",
-        ".write": "$uid === auth.uid"
+        ".write": "$uid === auth.uid",
+        "$entryId": {
+          ".validate": "newData.hasChildren(['uid', 'date', 'hrv', 'rhr', 'sleepHours', 'sleepQuality', 'recoveryScore', 'painScore']) && newData.child('uid').val() === $uid && newData.child('date').isNumber() && newData.child('hrv').isNumber() && newData.child('hrv').val() >= 0 && newData.child('hrv').val() <= 300 && newData.child('rhr').isNumber() && newData.child('rhr').val() >= 20 && newData.child('rhr').val() <= 250 && newData.child('sleepHours').isNumber() && newData.child('sleepHours').val() >= 0 && newData.child('sleepHours').val() <= 24 && newData.child('sleepQuality').isNumber() && newData.child('sleepQuality').val() >= 0 && newData.child('sleepQuality').val() <= 100 && newData.child('recoveryScore').isNumber() && newData.child('recoveryScore').val() >= 0 && newData.child('recoveryScore').val() <= 100 && newData.child('painScore').isNumber() && newData.child('painScore').val() >= 0 && newData.child('painScore').val() <= 100"
+        }
       }
     },
     "daily_status": {
       "$uid": {
         ".read": "$uid === auth.uid || root.child('users').child(auth.uid).child('role').val() === 'coach' && root.child('legions').child(root.child('users').child(auth.uid).child('legionId').val()).child('athleteUids').child($uid).exists()",
-        ".write": "$uid === auth.uid"
+        ".write": "$uid === auth.uid",
+        "$dateKey": {
+          ".validate": "newData.hasChildren(['uid', 'date', 'mood', 'energy', 'stress', 'sleepQuality']) && newData.child('uid').val() === $uid && newData.child('date').isNumber() && newData.child('mood').isNumber() && newData.child('mood').val() >= 1 && newData.child('mood').val() <= 5 && newData.child('energy').isNumber() && newData.child('energy').val() >= 1 && newData.child('energy').val() <= 5 && newData.child('stress').isNumber() && newData.child('stress').val() >= 1 && newData.child('stress').val() <= 5 && newData.child('sleepQuality').isNumber() && newData.child('sleepQuality').val() >= 1 && newData.child('sleepQuality').val() <= 5"
+        }
       }
     },
     "injuries": {
       "$uid": {
         ".read": "$uid === auth.uid || root.child('users').child(auth.uid).child('role').val() === 'coach' && root.child('legions').child(root.child('users').child(auth.uid).child('legionId').val()).child('athleteUids').child($uid).exists()",
-        ".write": "$uid === auth.uid"
+        ".write": "$uid === auth.uid",
+        "$markerId": {
+          ".validate": "newData.hasChildren(['uid', 'bodyPart', 'side', 'painType', 'intensity', 'timestamp', 'resolved']) && newData.child('uid').val() === $uid && newData.child('bodyPart').isString() && newData.child('bodyPart').val().length <= 100 && (newData.child('side').val() === 'left' || newData.child('side').val() === 'right' || newData.child('side').val() === 'center') && (newData.child('painType').val() === 'sharp' || newData.child('painType').val() === 'dull' || newData.child('painType').val() === 'burning' || newData.child('painType').val() === 'aching') && newData.child('intensity').isNumber() && newData.child('intensity').val() >= 1 && newData.child('intensity').val() <= 10 && newData.child('timestamp').isNumber() && newData.child('resolved').isBoolean()"
+        }
       }
     },
     "feedback": {
@@ -44,13 +59,17 @@
     "coach_notes": {
       "$uid": {
         ".read": "$uid === auth.uid || root.child('users').child(auth.uid).child('role').val() === 'coach' && root.child('legions').child(root.child('users').child(auth.uid).child('legionId').val()).child('athleteUids').child($uid).exists()",
-        ".write": "root.child('users').child(auth.uid).child('role').val() === 'coach' && root.child('legions').child(root.child('users').child(auth.uid).child('legionId').val()).child('athleteUids').child($uid).exists()"
+        ".write": "root.child('users').child(auth.uid).child('role').val() === 'coach' && root.child('legions').child(root.child('users').child(auth.uid).child('legionId').val()).child('athleteUids').child($uid).exists()",
+        "$noteId": {
+          ".validate": "newData.hasChildren(['athleteUid', 'coachUid', 'message', 'timestamp']) && newData.child('coachUid').val() === auth.uid && newData.child('message').isString() && newData.child('message').val().length <= 2000 && newData.child('timestamp').isNumber()"
+        }
       }
     },
     "legions": {
       "$legionId": {
         ".read": "data.child('coachUid').val() === auth.uid || data.child('athleteUids').child(auth.uid).exists()",
         ".write": "data.child('coachUid').val() === auth.uid || !data.exists()",
+        ".validate": "newData.hasChildren(['id', 'name', 'coachUid', 'inviteCode', 'sport', 'createdAt']) && newData.child('name').isString() && newData.child('name').val().length <= 100 && newData.child('sport').isString() && newData.child('sport').val().length <= 50 && newData.child('createdAt').isNumber()",
         "athleteUids": {
           "$uid": {
             ".write": "$uid === auth.uid || root.child('legions').child($legionId).child('coachUid').val() === auth.uid"
@@ -65,8 +84,13 @@
       }
     },
     "inviteCodes": {
-      ".read": "auth != null",
-      ".write": "auth != null"
+      ".read": false,
+      ".write": false,
+      "$code": {
+        ".read": "auth != null",
+        ".write": "auth != null && !data.exists() && root.child('users').child(auth.uid).child('role').val() === 'coach'",
+        ".validate": "newData.isString() && newData.val().length <= 128"
+      }
     }
   }
 }

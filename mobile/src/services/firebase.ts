@@ -29,6 +29,16 @@ import {
   DataSnapshot,
 } from 'firebase/database';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {
+  validateDailyStatus,
+  validateRecoveryEntry,
+  validatePainMarker,
+  validateWorkoutSession,
+  validateCoachNote,
+  validateInviteCode,
+  sanitizeString,
+  sanitizeNotes,
+} from '@/utils/validation';
 
 const firebaseConfig = {
   apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
@@ -135,9 +145,19 @@ export interface WorkoutSession {
 }
 
 export const saveWorkoutSession = async (uid: string, session: Omit<WorkoutSession, 'id'>) => {
+  // Validate input before writing to Firebase
+  const validation = validateWorkoutSession(session as unknown as Record<string, unknown>);
+  if (!validation.valid) {
+    throw new Error(`Validation failed: ${validation.error}`);
+  }
+
   try {
+    const sanitized = {
+      ...session,
+      notes: session.notes ? sanitizeNotes(session.notes) : undefined,
+    };
     const newRef = push(ref(db, `workouts/${uid}`));
-    await set(newRef, { ...session, id: newRef.key });
+    await set(newRef, { ...sanitized, id: newRef.key });
     return newRef.key;
   } catch (error) {
     console.error('Firebase saveWorkoutSession Error:', error);
@@ -168,6 +188,12 @@ export interface RecoveryEntry {
 }
 
 export const saveRecoveryEntry = async (uid: string, entry: Omit<RecoveryEntry, 'id'>) => {
+  // Validate input before writing to Firebase
+  const validation = validateRecoveryEntry(entry as unknown as Record<string, unknown>);
+  if (!validation.valid) {
+    throw new Error(`Validation failed: ${validation.error}`);
+  }
+
   const newRef = push(ref(db, `recovery/${uid}`));
   await set(newRef, { ...entry, id: newRef.key });
 };
@@ -195,8 +221,19 @@ export interface PainMarker {
 }
 
 export const savePainMarker = async (uid: string, marker: Omit<PainMarker, 'id'>) => {
+  // Validate input before writing to Firebase
+  const validation = validatePainMarker(marker as unknown as Record<string, unknown>);
+  if (!validation.valid) {
+    throw new Error(`Validation failed: ${validation.error}`);
+  }
+
+  const sanitized = {
+    ...marker,
+    notes: marker.notes ? sanitizeNotes(marker.notes) : undefined,
+    bodyPart: sanitizeString(marker.bodyPart, 100),
+  };
   const newRef = push(ref(db, `injuries/${uid}`));
-  await set(newRef, { ...marker, id: newRef.key });
+  await set(newRef, { ...sanitized, id: newRef.key });
   return newRef.key;
 };
 
@@ -236,11 +273,21 @@ export interface DailyStatus {
 }
 
 export const saveDailyStatus = async (uid: string, status: Omit<DailyStatus, 'id'>) => {
+  // Validate input before writing to Firebase
+  const validation = validateDailyStatus(status as unknown as Record<string, unknown>);
+  if (!validation.valid) {
+    throw new Error(`Validation failed: ${validation.error}`);
+  }
+
+  const sanitized = {
+    ...status,
+    notes: status.notes ? sanitizeNotes(status.notes) : undefined,
+  };
   const today = new Date().toISOString().split('T')[0];
-  await set(ref(db, `daily_status/${uid}/${today}`), status);
+  await set(ref(db, `daily_status/${uid}/${today}`), sanitized);
   // Mirror to legion if athlete has one
-  if (status.legionId) {
-    await set(ref(db, `legions/${status.legionId}/athlete_status/${uid}/${today}`), status);
+  if (sanitized.legionId) {
+    await set(ref(db, `legions/${sanitized.legionId}/athlete_status/${uid}/${today}`), sanitized);
   }
 };
 
@@ -281,6 +328,13 @@ export const forgeLegion = async (coachUid: string, name: string, sport: string)
 };
 
 export const joinLegion = async (uid: string, inviteCode: string): Promise<boolean> => {
+  // Validate invite code format before querying
+  const validation = validateInviteCode(inviteCode);
+  if (!validation.valid) {
+    console.warn('Invalid invite code format:', validation.error);
+    return false;
+  }
+
   const code = inviteCode.toUpperCase();
   const inviteSnap = await get(ref(db, `inviteCodes/${code}`));
   if (!inviteSnap.exists()) return false;
@@ -314,8 +368,18 @@ export interface CoachNote {
 }
 
 export const saveCoachNote = async (athleteUid: string, note: Omit<CoachNote, 'id'>) => {
+  // Validate input before writing
+  const validation = validateCoachNote(note as unknown as Record<string, unknown>);
+  if (!validation.valid) {
+    throw new Error(`Validation failed: ${validation.error}`);
+  }
+
+  const sanitized = {
+    ...note,
+    message: sanitizeString(note.message, 2000),
+  };
   const newRef = push(ref(db, `coach_notes/${athleteUid}`));
-  await set(newRef, { ...note, id: newRef.key });
+  await set(newRef, { ...sanitized, id: newRef.key });
 };
 
 export const subscribeToCoachNotes = (athleteUid: string, cb: (notes: CoachNote[]) => void) =>

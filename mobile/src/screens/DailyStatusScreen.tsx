@@ -116,9 +116,9 @@ const sp = StyleSheet.create({
   header: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: SPACING.xs },
   label: { fontFamily: FONTS.mono, fontSize: 10, letterSpacing: 1.5 },
   value: { fontFamily: FONTS.display, fontSize: 18, lineHeight: 22 },
-  row: { flexDirection: 'row', gap: SPACING.sm },
+  row: { flexDirection: 'row', gap: SPACING.xs },
   dot: {
-    flex: 1, height: 36, borderRadius: RADIUS.sm,
+    flex: 1, height: 50, borderRadius: RADIUS.sm,
     borderWidth: 1,
   },
 });

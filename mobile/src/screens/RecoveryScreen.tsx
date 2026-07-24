@@ -55,8 +55,10 @@ const getSuggestions = (score: number): string[] => {
 
 const RecoveryGraph = ({ recovery, t, colors }: any) => {
   const [width, setWidth] = React.useState(0);
-  const height = 160;
-  const padding = 20;
+  const height = 180;
+  const paddingX = 25;
+  const paddingYTop = 25;
+  const paddingYBot = 35;
 
   const chartData = recovery.length ? recovery.slice(0, 7).reverse() : [];
   const displayData = [...Array(Math.max(0, 7 - chartData.length)).fill(null), ...chartData];
@@ -84,8 +86,8 @@ const RecoveryGraph = ({ recovery, t, colors }: any) => {
             const minVal = 0;
             const points = displayData.map((entry, i) => {
               const score = entry ? calculateReadiness(entry.recoveryScore, entry.painScore) : 0;
-              const x = padding + (i * ((width - padding * 2) / 6));
-              const y = height - padding - ((score - minVal) / (maxVal - minVal) * (height - padding * 2));
+              const x = paddingX + (i * ((width - paddingX * 2) / 6));
+              const y = height - paddingYBot - ((score - minVal) / (maxVal - minVal) * (height - paddingYTop - paddingYBot));
               return { x, y, score, entry };
             });
             const validPoints = points.filter(p => p.entry !== null);
@@ -93,8 +95,8 @@ const RecoveryGraph = ({ recovery, t, colors }: any) => {
             return (
               <G>
                 {[0, 25, 50, 75, 100].map(val => {
-                  const y = height - padding - ((val - minVal) / (maxVal - minVal) * (height - padding * 2));
-                  return <Line key={val} x1={padding} y1={y} x2={width - padding} y2={y} stroke={colors.border} strokeWidth="1" strokeDasharray="4 4" />;
+                  const y = height - paddingYBot - ((val - minVal) / (maxVal - minVal) * (height - paddingYTop - paddingYBot));
+                  return <Line key={val} x1={paddingX} y1={y} x2={width - paddingX} y2={y} stroke={colors.border} strokeWidth="1" strokeDasharray="4 4" />;
                 })}
                 {validPoints.length > 1 && (
                   <SvgPath d={validPoints.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ')} fill="none" stroke={COLORS.accent} strokeWidth="3" />
@@ -105,7 +107,7 @@ const RecoveryGraph = ({ recovery, t, colors }: any) => {
                     <G key={i}>
                       {p.entry && <Circle cx={p.x} cy={p.y} r="5" fill={colors.bgCard} stroke={dotColor} strokeWidth="2" />}
                       {p.entry && p.score > 0 && <SvgText x={p.x} y={p.y - 12} fill={colors.textPrimary} fontSize="10" fontFamily={FONTS.mono} textAnchor="middle">{p.score}</SvgText>}
-                      <SvgText x={p.x} y={height - 2} fill={colors.textMuted} fontSize="10" fontFamily={FONTS.mono} textAnchor="middle">
+                      <SvgText x={p.x} y={height - 10} fill={colors.textMuted} fontSize="10" fontFamily={FONTS.mono} textAnchor="middle">
                         {p.entry ? new Date(p.entry.date).toLocaleDateString(undefined, { weekday: 'narrow' }) : '-'}
                       </SvgText>
                     </G>
@@ -242,49 +244,6 @@ function AthleteRecoveryView() {
         <StatCard label="Sleep" value={latest?.sleepHours ?? '--'} unit="hrs" accent={COLORS.lime} />
         <StatCard label="Quality" value={latest?.sleepQuality ?? '--'} unit="%" accent={COLORS.warning} />
       </View>
-
-      {/* Device Sync */}
-      {Platform.OS !== 'web' && (
-        <>
-          <Text style={[styles.sectionLabel, { marginTop: SPACING.lg }]}>DEVICE SYNC</Text>
-          <View style={styles.syncCard}>
-        {lastSync && (
-          <View style={styles.syncDeviceRow}>
-            <Ionicons name="watch-outline" size={16} color={COLORS.cyan} />
-            <Text style={styles.syncDeviceName}>{lastSync.device}</Text>
-            <View style={styles.syncConnectedDot} />
-            <Text style={styles.syncConnectedText}>CONNECTED</Text>
-          </View>
-        )}
-        <View style={styles.syncGrid}>
-          {[
-            { label: 'HRV', val: lastSync?.hrv, unit: 'ms', color: COLORS.cyan },
-            { label: 'RHR', val: lastSync?.rhr, unit: 'bpm', color: COLORS.purple },
-            { label: 'SLEEP', val: lastSync?.sleepHours, unit: 'hrs', color: COLORS.lime },
-          ].map(({ label, val, unit, color: c }) => (
-            <View key={label} style={styles.syncMetric}>
-              <Text style={[styles.syncMetricLabel, { color: c }]}>{label}</Text>
-              <Text style={styles.syncMetricVal}>
-                {syncing ? '...' : (val ?? '—')}
-              </Text>
-              <Text style={styles.syncMetricUnit}>{unit}</Text>
-            </View>
-          ))}
-        </View>
-        <Pressable
-          style={[styles.syncBtn, syncing && { opacity: 0.6 }]}
-          onPress={handleSync}
-          disabled={syncing}
-        >
-          <Ionicons name={syncing ? 'sync' : 'sync-outline'} size={16} color={COLORS.textInverse} />
-          <Text style={styles.syncBtnText}>{syncing ? 'SYNCING...' : 'SYNC DEVICE'}</Text>
-        </Pressable>
-        <Text style={styles.syncNote}>
-          Supports: Apple Watch • Garmin • Whoop • Polar • Google Fit
-          </Text>
-        </View>
-        </>
-      )}
 
       {/* AI Recovery Suggestions */}
       <Text style={[styles.sectionLabel, { marginTop: SPACING.lg }]}>AI RECOVERY SUGGESTIONS</Text>

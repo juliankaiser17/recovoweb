@@ -2,8 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { initializeApp, getApps, cert } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
 import { getDatabase } from 'firebase-admin/database';
+import { rateLimit } from '../../lib/rateLimit';
 
 export const dynamic = 'force-dynamic';
+
+// Rate limiter: 30 requests per minute per IP
+const limiter = rateLimit({ windowMs: 60_000, maxRequests: 30 });
 
 const initAdmin = () => {
   if (!getApps().length) {
@@ -45,6 +49,10 @@ function sanitizeId(input: string): string {
 }
 
 export async function GET(request: NextRequest) {
+  // Rate limiting
+  const rateLimitResult = limiter(request);
+  if (rateLimitResult) return rateLimitResult;
+
   try {
     // Verify authentication
     const decodedToken = await verifyAuth(request);

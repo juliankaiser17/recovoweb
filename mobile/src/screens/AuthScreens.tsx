@@ -20,8 +20,7 @@ import Svg, { Ellipse, Path as SvgPath, Circle, G } from 'react-native-svg';
 
 if (Platform.OS !== 'web') {
   GoogleSignin.configure({
-    webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID || 'dummy-client-id.apps.googleusercontent.com',
-    // You will need to add your SHA-1 to Firebase and get the webClientId
+    webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID || '708398928493-oli9niat2ejdt1rhstrolsr4q6omom02.apps.googleusercontent.com',
   });
 }
 
